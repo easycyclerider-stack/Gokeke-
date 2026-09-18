@@ -1,1 +1,75 @@
-'use client';import{useState}from'react';import{supabase}from'../../lib/supabase';export default function Auth(){const[email,setEmail]=useState('');const[name,setName]=useState('');const[mode,setMode]=useState<'login'|'signup'>('signup');const[msg,setMsg]=useState('');async function submit(){setMsg('');if(mode==='signup'){const{data,error}=await supabase.auth.signUp({email,password:email+'GoKeke1!',options:{data:{full_name:name}}});setMsg(error?.message||'Account created. Check your email if confirmation is enabled.')}else{const{error}=await supabase.auth.signInWithPassword({email,password:email+'GoKeke1!'});setMsg(error?.message||'Signed in successfully.')}}return <main style={{maxWidth:520,margin:'80px auto',padding:24}}><h1>GoKeke</h1><p>{mode==='signup'?'Create your passenger account':'Sign in to GoKeke'}</p>{mode==='signup'&&<input placeholder="Full name" value={name} onChange={e=>setName(e.target.value)} style={{display:'block',width:'100%',padding:14,margin:'10px 0'}}/>}<input placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} style={{display:'block',width:'100%',padding:14,margin:'10px 0'}}/><button className="btn lime" onClick={submit}>{mode==='signup'?'Create account':'Sign in'}</button><button className="btn" onClick={()=>setMode(mode==='signup'?'login':'signup')}>{mode==='signup'?'Already have an account':'Create account'}</button>{msg&&<p>{msg}</p>}</main>}
+'use client';
+
+import { FormEvent, useState } from 'react';
+import { supabase } from '../../lib/supabase';
+
+export default function Auth() {
+  const [mode, setMode] = useState<'signup' | 'login'>('signup');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'passenger' | 'driver'>('passenger');
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setMsg('');
+    setBusy(true);
+
+    if (mode === 'signup') {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: name, role } }
+      });
+      if (error) setMsg(error.message);
+      else if (data.user) {
+        const { error: profileError } = await supabase.from('profiles').upsert({
+          id: data.user.id,
+          full_name: name,
+          role
+        });
+        setMsg(profileError?.message || 'Account created. Check your email if confirmation is enabled.');
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      setMsg(error?.message || 'Signed in successfully.');
+    }
+
+    setBusy(false);
+  }
+
+  return (
+    <main style={{ maxWidth: 520, margin: '70px auto', padding: 24 }}>
+      <div className="panel">
+        <h1>GoKeke</h1>
+        <p>{mode === 'signup' ? 'Create your account' : 'Sign in to GoKeke'}</p>
+        <form onSubmit={submit}>
+          {mode === 'signup' && (
+            <>
+              <input required placeholder="Full name" value={name} onChange={e => setName(e.target.value)}
+                style={{ display: 'block', width: '100%', padding: 14, margin: '10px 0' }} />
+              <select value={role} onChange={e => setRole(e.target.value as 'passenger' | 'driver')}
+                style={{ display: 'block', width: '100%', padding: 14, margin: '10px 0' }}>
+                <option value="passenger">Passenger</option>
+                <option value="driver">Driver</option>
+              </select>
+            </>
+          )}
+          <input required type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
+            style={{ display: 'block', width: '100%', padding: 14, margin: '10px 0' }} />
+          <input required minLength={8} type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)}
+            style={{ display: 'block', width: '100%', padding: 14, margin: '10px 0' }} />
+          <button disabled={busy} className="btn lime" type="submit">
+            {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
+          </button>
+        </form>
+        <button className="btn" onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}>
+          {mode === 'signup' ? 'Already have an account' : 'Create account'}
+        </button>
+        {msg && <p>{msg}</p>}
+      </div>
+    </main>
+  );
+}

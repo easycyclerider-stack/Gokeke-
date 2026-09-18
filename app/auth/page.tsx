@@ -8,7 +8,6 @@ export default function Auth() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'passenger' | 'driver'>('passenger');
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -21,14 +20,14 @@ export default function Auth() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name, role } }
+        options: { data: { full_name: name, role: 'passenger' } }
       });
       if (error) setMsg(error.message);
       else if (data.user) {
         const { error: profileError } = await supabase.from('profiles').upsert({
           id: data.user.id,
           full_name: name,
-          role
+          role: 'passenger'
         });
         setMsg(profileError?.message || 'Account created. Check your email if confirmation is enabled.');
       }
@@ -47,15 +46,8 @@ export default function Auth() {
         <p>{mode === 'signup' ? 'Create your account' : 'Sign in to GoKeke'}</p>
         <form onSubmit={submit}>
           {mode === 'signup' && (
-            <>
-              <input required placeholder="Full name" value={name} onChange={e => setName(e.target.value)}
-                style={{ display: 'block', width: '100%', padding: 14, margin: '10px 0' }} />
-              <select value={role} onChange={e => setRole(e.target.value as 'passenger' | 'driver')}
-                style={{ display: 'block', width: '100%', padding: 14, margin: '10px 0' }}>
-                <option value="passenger">Passenger</option>
-                <option value="driver">Driver</option>
-              </select>
-            </>
+            <input required placeholder="Full name" value={name} onChange={e => setName(e.target.value)}
+              style={{ display: 'block', width: '100%', padding: 14, margin: '10px 0' }} />
           )}
           <input required type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
             style={{ display: 'block', width: '100%', padding: 14, margin: '10px 0' }} />

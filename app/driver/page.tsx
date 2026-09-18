@@ -125,6 +125,22 @@ export default function Driver() {
     setDriver({ ...driver, is_online: next });
   }
 
+  async function registerVehicle() {
+    if (!driver || !session) return;
+    const plate = window.prompt('Vehicle plate number');
+    if (!plate) return;
+    const make = window.prompt('Make (e.g. Bajaj/Honda)') || null;
+    const model = window.prompt('Model') || null;
+    const color = window.prompt('Color') || null;
+    const { error } = await supabase.from('vehicles').insert({
+      driver_id: driver.id,
+      type: vehicleType,
+      plate_number: plate.trim().toUpperCase(),
+      make, model, color, is_active: true
+    });
+    setMessage(error?.message || 'Vehicle registered.');
+  }
+
   async function acceptRide(ride: RideRow) {
     if (!driver) return;
 
@@ -305,7 +321,7 @@ export default function Driver() {
             >
               Keke
             </button>
-            <p>An active vehicle is required to accept rides.</p>
+            <p>An active vehicle is required to accept rides.</p><button className="btn lime" onClick={registerVehicle}>Register vehicle</button>
           </section>
 
           {active && (

@@ -11,8 +11,8 @@ export default function Home() {
     <>
       <nav className="nav">
         <div className="logo">Go<span>Keke</span></div>
-        <div className="links"><span>Ride</span><span>Drive</span><span>Safety</span><span>Help</span></div>
-        <button className="btn lime" onClick={() => setRequested(true)}>Get started</button>
+        <div className="links"><span>Ride</span><span>Drive with GoKeke</span><span>Safety</span><span>Help</span></div>
+        <button className="btn lime" onClick={() => window.location.href='/ride'}>Get started</button>
       </nav>
 
       <section className="hero">
@@ -21,8 +21,8 @@ export default function Home() {
           <h1 className="title">Your ride.<br /><span>Your way.</span></h1>
           <p className="copy">GoKeke connects passengers with nearby Okada and Keke drivers for quick, affordable trips.</p>
           <div className="actions">
-            <button className="btn lime" onClick={() => setRequested(true)}>{requested ? 'Ride requested' : 'Request a ride'}</button>
-            <button className="btn dark">Become a driver</button>
+            <button className="btn lime" onClick={() => window.location.href='/ride'}>Request a ride</button>
+            <button className="btn dark" onClick={() => window.location.href='/rider'}>Become a driver</button>
           </div>
         </div>
 
@@ -43,7 +43,7 @@ export default function Home() {
         <h2 style={{ fontSize: 46, letterSpacing: -2 }}>One system. Three experiences.</h2>
         <div className="grid">
           <div className="feature"><UserRound /><h3>Passenger app</h3><p>Sign in, set pickup and destination, choose Okada or Keke, request and track rides.</p></div>
-          <div className="feature"><Bike /><h3>Driver app</h3><p>Register, submit documents, go online, receive requests, complete trips and track earnings.</p></div>
+          <div className="feature"><Bike /><h3>Separate rider app</h3><p>Drivers use a dedicated GoKeke rider application for registration, verification, trips and earnings.</p></div>
           <div className="feature"><LayoutDashboard /><h3>Admin dashboard</h3><p>Review drivers, monitor rides, configure fares, manage payments and oversee platform activity.</p></div>
         </div>
       </section>
@@ -53,7 +53,7 @@ export default function Home() {
           <div className="eyebrow">Built for drivers</div>
           <h2 style={{ fontSize: 48, letterSpacing: -2 }}>Turn your wheels into income.</h2>
           <p className="copy">Go online, receive nearby requests, accept trips, complete rides and track your earnings.</p>
-          <button className="btn dark">Start driving</button>
+          <button className="btn dark" onClick={() => window.location.href='/rider'}>Start driving</button>
         </div>
         <div className="panel">
           <ShieldCheck /><h3>Verified before driving</h3>

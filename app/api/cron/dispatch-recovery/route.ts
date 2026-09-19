@@ -22,5 +22,12 @@ export async function GET(req: Request) {
     const {data:n,error:e}=await supabase.rpc('recover_stale_ride_dispatch',{p_ride_id:ride.id});
     if(!e) recovered+=Number(n||0);
   }
-  return NextResponse.json({ok:true,expired_offers:expired??0,rides_checked:rides?.length??0,offers_created:recovered});
+  let push_delivery:any={status:'skipped'};
+  const pushUrl=url + '/functions/v1/send-push-notifications';
+  try{
+    const pr=await fetch(pushUrl,{method:'POST',headers:{Authorization:'Bearer '+key}});
+    const body=await pr.json().catch(()=>({}));
+    push_delivery={status:pr.ok?'ok':'error',...body};
+  }catch(e:any){push_delivery={status:'error',error:e?.message||'Push delivery request failed'};}
+  return NextResponse.json({ok:true,expired_offers:expired??0,rides_checked:rides?.length??0,offers_created:recovered,push_delivery});
 }

@@ -57,13 +57,23 @@ export default function Passenger() {
     if (!mapReady) return;
     (async () => {
       const L = await import('leaflet');
-      if (mapRef.current && pickup) {
-        const map = (mapRef.current as any)._leaflet_map;
+      const map = mapObj.current;
+      if (!map) return;
+      if (pickup) {
+        if (!pickupMarker.current) pickupMarker.current = L.marker([pickup.lat, pickup.lng]).addTo(map);
+        else pickupMarker.current.setLatLng([pickup.lat, pickup.lng]);
+      } else if (pickupMarker.current) {
+        pickupMarker.current.remove();
+        pickupMarker.current = null;
       }
-      if (pickup && !pickupMarker.current) {
-        const map = (mapRef.current as any)?._leaflet_map;
-        if (map) pickupMarker.current = L.marker([pickup.lat, pickup.lng]).addTo(map);
+      if (destination) {
+        if (!destinationMarker.current) destinationMarker.current = L.marker([destination.lat, destination.lng]).addTo(map);
+        else destinationMarker.current.setLatLng([destination.lat, destination.lng]);
+      } else if (destinationMarker.current) {
+        destinationMarker.current.remove();
+        destinationMarker.current = null;
       }
+      if (pickup && destination) map.fitBounds([[pickup.lat,pickup.lng],[destination.lat,destination.lng]], { padding: [30,30] });
     })();
   }, [pickup, destination, mapReady]);
 

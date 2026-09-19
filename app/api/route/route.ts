@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
+import { createSupabaseServerClient } from '../../../lib/supabase-server';
 
 export const runtime = 'nodejs';
 
 export async function GET(req: Request) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const fromLat = Number(searchParams.get('fromLat'));
   const fromLng = Number(searchParams.get('fromLng'));

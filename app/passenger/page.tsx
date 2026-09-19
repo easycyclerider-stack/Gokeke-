@@ -23,7 +23,7 @@ export default function Passenger() {
   const [vehicle, setVehicle] = useState<Vehicle>('okada');
   const [ride, setRide] = useState<any>(null);
   const [mapReady, setMapReady] = useState(false);
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<HTMLDivElement | null>(null);\n  const mapObj = useRef<any>(null);\n  const driverMarker = useRef<any>(null);
   const pickupMarker = useRef<any>(null);
   const destinationMarker = useRef<any>(null);
 
@@ -37,7 +37,7 @@ export default function Passenger() {
     (async () => {
       const L = await import('leaflet');
       if (cancelled || !mapRef.current) return;
-      const map = L.map(mapRef.current).setView([KADUNA.lat, KADUNA.lng], 14);
+      const map = L.map(mapRef.current).setView([KADUNA.lat, KADUNA.lng], 14);\n      mapObj.current = map;
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
@@ -62,7 +62,7 @@ export default function Passenger() {
         if (map) pickupMarker.current = L.marker([pickup.lat, pickup.lng]).addTo(map);
       }
     })();
-  }, [pickup, mapReady]);
+  }, [pickup, destination, mapReady]);
 
   async function useGPS() {
     if (!navigator.geolocation) return setMsg('GPS is not available on this device.');
@@ -97,7 +97,7 @@ export default function Passenger() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'rides', filter: 'id=eq.' + ride.id },
         ({ new: row }) => setRide(row))
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ride_locations', filter: 'ride_id=eq.' + ride.id },
-        ({ new: row }) => setRide((old: any) => ({ ...old, live_location: row })))
+        ({ new: row }) => { setRide((old: any) => ({ ...old, live_location: row })); if (mapObj.current) { import('leaflet').then(L => { const coords = row.location?.coordinates; if (!coords) return; const [lng,lat] = coords; if (!driverMarker.current) driverMarker.current = L.marker([lat,lng]).addTo(mapObj.current); else driverMarker.current.setLatLng([lat,lng]); }); } })
       .subscribe();
     return () => { supabase.removeChannel(rideChannel); };
   }, [ride?.id]);

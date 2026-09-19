@@ -11,12 +11,16 @@ export async function GET(req: Request) {
   if (!url || !key) return NextResponse.json({error:'Server configuration incomplete'},{status:500});
 
   const supabase = createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data:staleDrivers,error:staleDriverError}=await supabase.rpc('expire_stale_driver_sessions');
+  if(staleDriverError)return NextResponse.json({error:staleDriverError.message},{status:500});
   const {data:expired,error:expireError}=await supabase.rpc('expire_ride_offers');
   if(expireError)return NextResponse.json({error:expireError.message},{status:500});
 
   const {data:rides,error}=await supabase.from('rides').select('id').eq('status','requested').limit(100);
   if(error)return NextResponse.json({error:error.message},{status:500});
 
+  const {data:staleAssigned,error:staleAssignedError}=await supabase.rpc('recover_stale_assigned_rides');
+  if(staleAssignedError)return NextResponse.json({error:staleAssignedError.message},{status:500});
   let recovered=0;
   for(const ride of rides??[]){
     const {data:n,error:e}=await supabase.rpc('recover_stale_ride_dispatch',{p_ride_id:ride.id});
@@ -29,5 +33,5 @@ export async function GET(req: Request) {
     const body=await pr.json().catch(()=>({}));
     push_delivery={status:pr.ok?'ok':'error',...body};
   }catch(e:any){push_delivery={status:'error',error:e?.message||'Push delivery request failed'};}
-  return NextResponse.json({ok:true,expired_offers:expired??0,rides_checked:rides?.length??0,offers_created:recovered,push_delivery});
+  return NextResponse.json({ok:true,stale_drivers:staleDrivers??0,stale_assigned_rides:staleAssigned??0,expired_offers:expired??0,rides_checked:rides?.length??0,offers_created:recovered,push_delivery});
 }

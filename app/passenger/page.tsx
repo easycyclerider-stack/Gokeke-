@@ -23,7 +23,9 @@ export default function Passenger() {
   const [vehicle, setVehicle] = useState<Vehicle>('okada');
   const [ride, setRide] = useState<any>(null);
   const [mapReady, setMapReady] = useState(false);
-  const mapRef = useRef<HTMLDivElement | null>(null);\n  const mapObj = useRef<any>(null);\n  const driverMarker = useRef<any>(null);
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  const mapObj = useRef<any>(null);
+  const driverMarker = useRef<any>(null);
   const pickupMarker = useRef<any>(null);
   const destinationMarker = useRef<any>(null);
 
@@ -37,7 +39,8 @@ export default function Passenger() {
     (async () => {
       const L = await import('leaflet');
       if (cancelled || !mapRef.current) return;
-      const map = L.map(mapRef.current).setView([KADUNA.lat, KADUNA.lng], 14);\n      mapObj.current = map;
+      const map = L.map(mapRef.current).setView([KADUNA.lat, KADUNA.lng], 14);
+      mapObj.current = map;
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
@@ -102,7 +105,7 @@ export default function Passenger() {
     return () => { supabase.removeChannel(rideChannel); };
   }, [ride?.id]);
 
-  if (!session) return <main style={{maxWidth:520,margin:'70px auto',padding:24}}><div className="panel"><h1>GoKeke Passenger</h1><p>{mode==='login'?'Sign in to book a ride':'Create your passenger account'}</p><form onSubmit={async(e:FormEvent)=>{e.preventDefault();setMsg('');if(mode==='login'){const{x,error}=await supabase.auth.signInWithPassword({email,password:pw});if(error)setMsg(error.message);else{setS(x.session);router.push('/passenger')}}else{const{x,error}=await supabase.auth.signUp({email,password:pw,options:{data:{full_name:name,role:'passenger'}}});if(error)setMsg(error.message);else if(x.user){await supabase.from('profiles').upsert({id:x.user.id,full_name:name,role:'passenger'});setMsg('Account created. Check email confirmation if enabled.')}}}}>{mode==='signup'&&<input required placeholder="Full name" value={name} onChange={e=>setName(e.target.value)}/>}<input required type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)}/><input required minLength={8} type="password" placeholder="Password" value={pw} onChange={e=>setPw(e.target.value)}/><button className="btn lime">{mode==='login'?'Sign in':'Create account'}</button></form><button className="btn" onClick={()=>setMode(mode==='login'?'signup':'login')}>{mode==='login'?'Create account':'I already have an account'}</button>{msg&&<p>{msg}</p>}</div></main>;
+  if (!session) return <main style={{maxWidth:520,margin:'70px auto',padding:24}}><div className="panel"><h1>GoKeke Passenger</h1><p>{mode==='login'?'Sign in to book a ride':'Create your passenger account'}</p><form onSubmit={async(e:FormEvent)=>{e.preventDefault();setMsg('');if(mode==='login'){const{x,error}=await supabase.auth.signInWithPassword({email,password:pw});if(error)setMsg(error.message);else{setSession(x.session);router.push('/passenger')}}else{const{x,error}=await supabase.auth.signUp({email,password:pw,options:{data:{full_name:name,role:'passenger'}}});if(error)setMsg(error.message);else if(x.user){await supabase.from('profiles').upsert({id:x.user.id,full_name:name,role:'passenger'});setMsg('Account created. Check email confirmation if enabled.')}}}}>{mode==='signup'&&<input required placeholder="Full name" value={name} onChange={e=>setName(e.target.value)}/>}<input required type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)}/><input required minLength={8} type="password" placeholder="Password" value={pw} onChange={e=>setPw(e.target.value)}/><button className="btn lime">{mode==='login'?'Sign in':'Create account'}</button></form><button className="btn" onClick={()=>setMode(mode==='login'?'signup':'login')}>{mode==='login'?'Create account':'I already have an account'}</button>{msg&&<p>{msg}</p>}</div></main>;
 
   return <main style={{maxWidth:900,margin:'30px auto',padding:24}}>
     <h1>GoKeke Kaduna</h1><p>Live pickup and destination map</p>

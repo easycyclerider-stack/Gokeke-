@@ -1,6 +1,6 @@
 {
   "name": "gokeke",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.57.0",
+    "@supabase/supabase-js": "^2.105.3",
     "@supabase/ssr": "^0.10.0",
     "@types/leaflet": "^1.9.20",
     "@types/node": "^22.15.0",
